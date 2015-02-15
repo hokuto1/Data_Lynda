@@ -9,4 +9,5 @@ The new website http://lpo.dt.navy.mil/data/ no longer contains a convenient dir
 
 New features:
 - Implemented basic error checking
-- Also converted all computations to BigDecimal considering the floating point inaccuracies.
+- Converted all computations to BigDecimal considering the floating point inaccuracies
+- Added a graphing functionality that allows user to visualize data as a simple bar graph. Used with JFreeChart library
