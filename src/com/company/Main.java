@@ -16,8 +16,11 @@ import java.util.Scanner;
 
 
 public class Main {
-
+    // Only need one instance of a Scanner of STDIN
+    public final static Scanner in = new Scanner(System.in);
     final static String DATE_FORMAT = "dd-MM-yyyy";
+    public final static String[] headers = {"Air_Temp:\t\t\t", "Barometric_Press:\t", "Dew_Point:\t\t\t",
+            "Relative_Humidity:\t", "Wind_Dir:\t\t\t", "Wind_Gust:\t\t\t", "Wind_Speed:\t\t\t"};
 
     public static ArrayList<String> getData(String year, String month, String day)
         throws NumberFormatException, IOException {
@@ -176,31 +179,68 @@ public class Main {
     public static void main(String[] args)
         throws IOException {
         ArrayList<String> navyData;
-        String[] headers = {"Air_Temp:\t\t\t", "Barometric_Press:\t", "Dew_Point:\t\t\t",
-                "Relative_Humidity:\t", "Wind_Dir:\t\t\t", "Wind_Gust:\t\t\t", "Wind_Speed:\t\t\t"};
-        Scanner in = new Scanner(System.in);
+
         String[] time = {"", "", ""};
         while (true) {
             System.out.println("Enter a year (2011-2014)");
             time[0] = in.nextLine();
 
+            double year_d = Double.parseDouble(time[0]);
+            if (year_d > 2014 || year_d < 2011) {
+                System.out.printf("The entered year %s is invalid. Please try again with a value in" +
+                        "2011-2014\n", time[0]);
+                continue;
+            }
+
             System.out.println("Enter a month");
             time[1] = in.nextLine();
 
+            double month_d = Double.parseDouble(time[1]);
+            if (month_d > 12 || month_d < 1) {
+                System.out.printf("The entered month %s is invalid. Please try again with a value in " +
+                        "1-12\n", time[1]);
+                continue;
+            }
+
             System.out.println("Enter a day");
             time[2] = in.nextLine();
+
+            double day_d = Double.parseDouble(time[2]);
+            if (day_d > 31 || day_d < 1) {
+                System.out.printf("The entered day %s is invalid. Please try again with a value in " +
+                        "1-31\n", time[2]);
+                continue;
+            }
 
             if (!validDate(time[2] + "-" + time[1] + "-" + time[0])) {
                 System.out.printf("The entered date %s is invalid. Please try again\n",
                         time[2] + "-" + time[1] + "-" + time[0]);
                 continue;
             }
-            else
+
+            navyData = getData(time[0], time[1], time[2]);
+
+            if (navyData.isEmpty()) {
+                System.out.printf("Data does not exist for specified date %s\n Try another date?\n",
+                        time[2] + "-" + time[1] + "-" + time[0]);
+                time[0] = Main.in.nextLine();
+                if (time[0].length() > 0 && time[0].toUpperCase().charAt(0) == 'Y') {
+                    continue;
+                }
+                else {
+                    break;
+                }
+            }
+            else {
+                System.out.println("Data found for date " +time[2] + "-" + time[1] + "-" + time[0] +
+                        "\nProcessing now...\n");
                 break;
+            }
         }
-        // Don't close STDIN until we get here
-        in.close();
-        navyData = getData(time[0], time[1], time[2]);
+        // Don't close STDIN until we get to image creation
+
+
+
         ArrayList<ArrayList<BigDecimal>> processed = parseData(navyData);
 
         ArrayList<BigDecimal> allMeans = processed.get(0);
@@ -216,5 +256,6 @@ public class Main {
             System.out.printf("%7.2f\t\t%7.2f\n" , allMeans.get(iter).doubleValue(), allMedians.get(iter).doubleValue());
             iter++;
         }
+        Grapher.visualize(processed);
     }
 }
